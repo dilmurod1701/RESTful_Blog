@@ -1,17 +1,20 @@
+from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework.test import APIClient
-from django.contrib.auth.models import User
+from selenium import webdriver
 
 from .models import Blog
+
+
 # Create your tests here.
 
 
 class TestModels(TestCase):
     def setUp(self) -> None:
-        Blog.objects.create(title='chingiz', content='streamer', date='2023-01-01')
-        Blog.objects.create(title='serikboy', content='businessmen', date='2020-04-23')
-        Blog.objects.create(title='cbum', content='kachka', date='2021-11-11')
-        Blog.objects.create(title='speed', content='xaroshiy paren', date='2014-09-24')
+        Blog.objects.create(user=User.objects.create_user(username='alabay', password='alabay01'), title='chingiz', content='streamer', date='2023-01-01')
+        Blog.objects.create(user=User.objects.create_user(username='alabay1', password='alabay01'), title='serikboy', content='businessmen', date='2020-04-23')
+        Blog.objects.create(user=User.objects.create_user(username='alabay2', password='alabay01'), title='cbum', content='kachka', date='2021-11-11')
+        Blog.objects.create(user=User.objects.create_user(username='alabay3', password='alabay01'), title='speed', content='xaroshiy paren', date='2014-09-24')
 
     def test_title(self):
         obj1 = Blog.objects.get(title='chingiz')
@@ -36,13 +39,26 @@ class TestModels(TestCase):
 
 class TestView(TestCase):
     def setUp(self) -> None:
-        Blog.objects.create(title='chingiz', content='streamer', date='2023-01-01')
-        Blog.objects.create(title='serikboy', content='businessmen', date='2020-04-23')
-        Blog.objects.create(title='cbum', content='kachka', date='2021-11-11')
-        Blog.objects.create(title='speed', content='xaroshiy paren', date='2014-09-24')
+        self.client = APIClient()
+        Blog.objects.create(user=User.objects.create_user(username='alabay4', password='alabay01'), title='chingiz', content='streamer', date='2023-01-01')
+        Blog.objects.create(user=User.objects.create_user(username='alabay5', password='alabay01'), title='serikboy', content='businessmen', date='2020-04-23')
+        Blog.objects.create(user=User.objects.create_user(username='alabay6', password='alabay01'), title='cbum', content='kachka', date='2021-11-11')
+        Blog.objects.create(user=User.objects.create_user(username='alabay7', password='alabay01'), title='speed', content='xaroshiy paren', date='2014-09-24')
 
     def test_website(self):
-        self.client = APIClient()
-        response = self.client.get('api/')
-        print(response.json())
+        response = self.client.get('http://127.0.0.1:8000/api/')
         return self.assertEquals(response.json()[1]['title'], 'serikboy')
+
+
+class BlogSelenium(TestCase):
+    def setUp(self) -> None:
+        Blog.objects.create(user=User.objects.create_user(username='alabay4', password='alabay01'), title='chingiz', content='streamer', date='2023-01-01')
+        Blog.objects.create(user=User.objects.create_user(username='alabay5', password='alabay01'), title='serikboy', content='businessmen', date='2020-04-23')
+        Blog.objects.create(user=User.objects.create_user(username='alabay6', password='alabay01'), title='cbum', content='kachka', date='2021-11-11')
+        Blog.objects.create(user=User.objects.create_user(username='alabay7', password='alabay01'), title='speed', content='xaroshiy paren', date='2014-09-24')
+
+    def test_selenium(self):
+        self.client = APIClient()
+        site = webdriver.Chrome()
+        site.get('http://127.0.0.1:8000/api')
+        assert 'title' in site.page_source
